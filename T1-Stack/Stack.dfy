@@ -11,13 +11,13 @@ class Stack{
         -1 <= top < capacity
     }
 
-    predicate isEmpty()
+    predicate Empty()
     reads this;
     {
         top == -1
     }
 
-    predicate isFull()
+    predicate Full()
     reads this;
     {
        top == capacity 
@@ -25,7 +25,7 @@ class Stack{
 
     constructor (c : int)
     requires c > 0;
-    ensures isEmpty();
+    ensures Empty();
     ensures fresh(list);
     ensures this.list.Length == c;
     ensures capacity == c && top == -1;
@@ -33,5 +33,21 @@ class Stack{
         capacity := c;
         list := new int[c];
         top := -1;
+    }
+
+    method isEmpty() returns (r:bool)
+    requires Empty();
+    requires Valid();
+    ensures Empty();
+    {
+        return true;
+    }
+
+    method isFull() returns (r:bool)
+    requires Full();
+    requires Valid();
+    ensures Full();
+    {
+        return true;
     }
 }
