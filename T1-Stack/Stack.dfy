@@ -50,4 +50,23 @@ class Stack{
     {
         return true;
     }
+
+    method Peek() returns (r:int)
+    requires Valid();
+    requires !Empty();
+    ensures list == old(list) && r == list[top]
+    {
+        return list[top];
+    }
+
+    
+    //method Push (r:int)
+    //modifies list, `top;
+    //requires Valid();
+    //requires !Full();
+    //ensures r == list[top];
+    //{
+    //    top := top+1;
+    //    list[top] := r;
+    //}
 }
