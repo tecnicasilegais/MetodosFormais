@@ -1,3 +1,5 @@
+//Integrantes:
+//Eduardo Andrade, Marcelo Heredia, Michael Rosa
 class {:autocontracts} Stack
 {
     ghost const maxLen: int;
@@ -31,10 +33,8 @@ class {:autocontracts} Stack
     }
 
     method Push(e: int) returns (b: bool)
-    ensures old(|data|) < maxLen ==> data == old(data) + [e]
-    ensures old(|data|) >= maxLen ==> data == old(data)
-    ensures b == (old(|data|) < maxLen)
-    ensures b == (|data| != old(|data|))
+    ensures old(|data|) < maxLen ==> data == old(data) + [e] && b == true
+    ensures old(|data|) >= maxLen ==> data == old(data) && b == false
     {
         if head < max
         {
@@ -51,7 +51,7 @@ class {:autocontracts} Stack
 
     method Pop() returns (e: int)
     requires |data|>0
-    ensures data == old(data)[0..old(|data|)-1]
+    ensures data == old(data[0..|data|-1])
     ensures e == old(data)[|data|]
     {
         head := head - 1;
@@ -62,7 +62,7 @@ class {:autocontracts} Stack
     }
 
     method Drop()
-    ensures old(|data|)>0 ==> data == old(data)[0..old(|data|)-1]
+    ensures old(|data|)>0 ==> data == old(data[0..|data|-1])
     {
         if head > 0
         {
@@ -82,60 +82,59 @@ class {:autocontracts} Stack
     }
 
     method Full() returns (b: bool)
-    ensures b == (|data| == maxLen)
     ensures data == old(data)
+    ensures b == (|data| == maxLen)
     {
         return head == max;
     }
 
     method Empty() returns (b: bool)
-    ensures b == (|data| == 0)
     ensures data == old(data)
+    ensures b == (|data| == 0)
     {
         return head==0;
     }
 
     method Count() returns (n: int)
-    ensures n == |data|
     ensures data == old(data)
+    ensures n == |data|
     {
         n := head;
     }
 
     method Capacity() returns (s: int)
-    ensures s == maxLen
     ensures data == old(data)
+    ensures s == maxLen
     {
         s := max;
     }
 
     method Reverse()
-    requires |data| > 0
     ensures |data| == old(|data|)
     ensures reversed(data, old(data))
-	ensures forall k :: 0 <= k < head ==> arr[k] == old(arr[head-1 - k]);
     {
-
-        var i := 0;
-        var j := head-1;
-        while i < (j+1)/2
-        invariant 0 <= i <= (j+1)/2
-        invariant 0 <= j < head <= arr.Length;
-		invariant forall k :: 0 <= k < i || j-i < k <= j ==> arr[k] == old(arr[j-k]);
-		invariant forall k :: i <= k <= j-i ==> arr[k] == old(arr[k]);
-        {
-            arr[i], arr[j-i] := arr[j-i], arr[i];
-            i := i + 1;
-        }
-
+        ReverseInRange(arr, head);
         data := arr[0..head];
-        
     }
 }
-predicate permutacao (a:seq<int>, b:seq<int>)
+
+method ReverseInRange(arr: array<int>, limit: int)
+requires 0 <= limit <= arr.Length
+modifies arr
+ensures reversed(arr[..limit], old(arr[..limit]))
 {
-    multiset(a) == multiset(b)
+	var hi := limit-1;
+	var lo := 0;
+	while (lo < hi-lo)
+		invariant 0 <= lo <= (hi+1)/2
+		invariant forall i :: 0 <= i < lo || hi-lo < i <= hi ==> arr[i] == old(arr[hi-i])
+		invariant forall i :: lo <= i <= hi-lo ==> arr[i] == old(arr[i])
+	{
+		arr[lo], arr[hi-lo] := arr[hi-lo], arr[lo];
+		lo := lo + 1;
+	}
 }
+
 predicate reversed(sq1: seq<int>, sq2: seq<int>)
 requires |sq1| == |sq2|
 {
@@ -194,5 +193,6 @@ method Main()
 
     var pop := stack.Pop();
     assert pop == 2;
+    assert stack.data == [4,3];
     
 }
