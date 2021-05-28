@@ -113,26 +113,16 @@ class {:autocontracts} Stack
     ensures |data| == old(|data|)
     ensures reversed(data, old(data))
     {
-        ReverseInRange(arr, head);
+        var novo := new int[arr.Length];
+	    var tam := head-1;
+	    forall i | 0 <= i <= tam
+	    {
+		    novo[i] := arr[tam-i];
+	    }
+
+	    arr := novo;
         data := arr[0..head];
     }
-}
-
-method ReverseInRange(arr: array<int>, limit: int)
-requires 0 <= limit <= arr.Length
-modifies arr
-ensures reversed(arr[..limit], old(arr[..limit]))
-{
-	var hi := limit-1;
-	var lo := 0;
-	while (lo < hi-lo)
-		invariant 0 <= lo <= (hi+1)/2
-		invariant forall i :: 0 <= i < lo || hi-lo < i <= hi ==> arr[i] == old(arr[hi-i])
-		invariant forall i :: lo <= i <= hi-lo ==> arr[i] == old(arr[i])
-	{
-		arr[lo], arr[hi-lo] := arr[hi-lo], arr[lo];
-		lo := lo + 1;
-	}
 }
 
 predicate reversed(sq1: seq<int>, sq2: seq<int>)
@@ -140,7 +130,6 @@ requires |sq1| == |sq2|
 {
     forall i :: 0 <= i < |sq1| ==> sq1[i] == sq2[|sq2|-1-i]
 }
-
 method Main()
 {
     var s := []; 
